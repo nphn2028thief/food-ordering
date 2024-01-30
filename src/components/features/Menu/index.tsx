@@ -10,7 +10,7 @@ const Menu = () => {
       <SectionHeader title="menu" />
 
       <div className="absolute left-0 right-0">
-        <div className="absolute left-0 -top-[152px] -z-[1]">
+        <div className="absolute left-0 -top-28 md:-top-[152px] -z-[1]">
           <Image
             src="/images/salad1.png"
             width={109}
@@ -19,7 +19,7 @@ const Menu = () => {
             alt="salad1"
           />
         </div>
-        <div className="absolute right-0 -top-56 -z-[1]">
+        <div className="absolute right-0 -top-44 md:-top-56 -z-[1]">
           <Image
             src="/images/salad2.png"
             width={107}

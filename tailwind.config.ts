@@ -14,6 +14,10 @@ const config: Config = {
       colors: {
         primary: "#f13a01",
       },
+      gridTemplateColumns: {
+        banner: "0.4fr 0.6fr",
+        "banner-responsive": "0.6fr 0.4fr",
+      },
     },
   },
   plugins: [],
