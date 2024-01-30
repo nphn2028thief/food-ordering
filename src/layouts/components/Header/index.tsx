@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { CPath } from "@/constanst/path";
+import Button from "../../../components/common/Button";
 
 const Header = () => {
   return (
@@ -25,12 +26,10 @@ const Header = () => {
         <Link href={""} className="px-8 py-2 capitalize">
           contact
         </Link>
-        <Link
-          href={""}
-          className="px-8 py-2 bg-primary text-white rounded-full capitalize"
-        >
-          login
-        </Link>
+
+        <Button primary className="!px-8 !py-2 !font-semibold">
+          Login
+        </Button>
       </nav>
     </header>
   );
