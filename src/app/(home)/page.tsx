@@ -33,7 +33,7 @@ const HomePage = () => {
 
       <section className="my-14">
         <SectionHeader title="Don't hesitate to contact us" />
-        <div className="text-xl md:text-2xl xl:text-3xl text-center mt-6 underline">
+        <div className="text-xl md:text-2xl text-center mt-6 underline">
           <a href="tel:+84777498646">+84777498646</a>
         </div>
       </section>
