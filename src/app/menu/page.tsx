@@ -1,7 +1,13 @@
-import React from "react";
+import dynamic from "next/dynamic";
+
+import Loading from "@/components/common/Loading";
+
+const Menu = dynamic(() => import("@/components/pages/Menu"), {
+  loading: () => <Loading />,
+});
 
 const MenuPage = () => {
-  return <div>MenuPage</div>;
+  return <Menu />;
 };
 
 export default MenuPage;
