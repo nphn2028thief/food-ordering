@@ -1,7 +1,13 @@
-import React from "react";
+import dynamic from "next/dynamic";
+
+import Loading from "@/components/common/Loading";
+
+const About = dynamic(() => import("@/components/pages/About"), {
+  loading: () => <Loading />,
+});
 
 const AboutPage = () => {
-  return <div>AboutPage</div>;
+  return <About />;
 };
 
 export default AboutPage;

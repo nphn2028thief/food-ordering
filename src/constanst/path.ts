@@ -5,7 +5,8 @@ export enum CPath {
   MENU = "/menu",
   ABOUT = "/about",
   CONTACT = "/contact",
-  LOGIN = "/login",
+  SIGNIN = "/sign-in",
+  SIGNUP = "/sign-up",
 }
 
 export const CPathList: IPath[] = [
