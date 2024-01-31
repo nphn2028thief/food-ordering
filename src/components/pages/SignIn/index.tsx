@@ -74,7 +74,7 @@ const SignIn = () => {
           className="shadow-google-btn"
           startIcon={<FcGoogle size={24} />}
         >
-          Google
+          Sign in with Google
         </Button>
       </form>
     </section>
