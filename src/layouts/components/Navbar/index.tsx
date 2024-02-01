@@ -9,7 +9,7 @@ import { AnimatePresence, motion } from "framer-motion";
 
 import Button from "@/components/common/Button";
 import Logo from "@/components/common/Logo";
-import { CPath, CPathList } from "@/constanst/path";
+import { CPath, CPathList } from "@/constants/path";
 
 const Navbar = () => {
   const pathname = usePathname();

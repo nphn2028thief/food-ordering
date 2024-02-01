@@ -6,13 +6,15 @@ import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FcGoogle } from "react-icons/fc";
 import { toast } from "react-toastify";
+import { useMutation } from "@tanstack/react-query";
 
+import axiosClient from "@/api/axiosClient";
 import Input from "@/components/common/HookForm/Input";
 import Button from "@/components/common/Button";
-import { CPath } from "@/constanst/path";
+import { CPath } from "@/constants/path";
 import { useAppDispatch } from "@/lib/hooks";
 import { setIsLoading } from "@/lib/features/loading/loadingSlice";
-import { ISignIn } from "@/type/auth";
+import { IMessage, ISignIn, ISignInResponse } from "@/types/auth";
 
 const schema = Yup.object({
   email: Yup.string().email("Email is invalid!").required("Email is required!"),
@@ -20,8 +22,13 @@ const schema = Yup.object({
 });
 
 const SignIn = () => {
+  const dispatch = useAppDispatch();
+
+  // React hook form lib
   const {
     register,
+    setFocus,
+    reset,
     formState: { errors },
     handleSubmit,
   } = useForm<ISignIn>({
@@ -32,23 +39,31 @@ const SignIn = () => {
     resolver: yupResolver(schema),
   });
 
-  const dispatch = useAppDispatch();
+  // Call api sign in with @tanstack/react-query lib
+  const { mutate: signIn } = useMutation({
+    mutationFn: async (data: ISignIn) => {
+      const res = await axiosClient.post<ISignInResponse>(
+        "/auth/sign-in",
+        data
+      );
+      return res.data;
+    },
+    onSuccess: (data) => {
+      toast.success(data.message || "Sign in successfully!");
+      reset();
+    },
+    onError: (err: IMessage) => {
+      toast.error(err.message || "Sign in failure!");
+      setFocus("email");
+    },
+    onSettled: () => {
+      dispatch(setIsLoading(false));
+    },
+  });
 
   const onSubmit = (data: ISignIn) => {
-    console.log(data);
-
-    const id = toast.loading("Waiting for sign in...", {});
     dispatch(setIsLoading(true));
-
-    setTimeout(() => {
-      toast.update(id, {
-        render: "Sign in successfully!",
-        type: "success",
-        isLoading: false,
-      });
-
-      dispatch(setIsLoading(false));
-    }, 2000);
+    signIn(data);
   };
 
   return (
@@ -61,7 +76,7 @@ const SignIn = () => {
         <Input
           label="Email"
           htmlFor="email"
-          placeholder="E.g: Nhan Nguyen"
+          placeholder="E.g: example@gmail.com"
           register={register("email")}
           className="!py-3"
           errors={errors}
@@ -70,7 +85,7 @@ const SignIn = () => {
           type="password"
           label="Password"
           htmlFor="password"
-          placeholder="E.g: Nhan Nguyen"
+          placeholder="•••••••"
           register={register("password")}
           className="!py-3"
           errors={errors}
@@ -93,7 +108,7 @@ const SignIn = () => {
           className="shadow-google-btn"
           startIcon={<FcGoogle size={24} />}
         >
-          Google
+          Sign in with Google
         </Button>
       </form>
     </section>

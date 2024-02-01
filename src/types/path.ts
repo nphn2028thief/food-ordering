@@ -1,4 +1,4 @@
-import { CPath } from "@/constanst/path";
+import { CPath } from "@/constants/path";
 
 export interface IPath {
   id: number;

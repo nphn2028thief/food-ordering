@@ -1,4 +1,4 @@
-import { IPath } from "@/type/path";
+import { IPath } from "@/types/path";
 
 export enum CPath {
   HOME = "/",
