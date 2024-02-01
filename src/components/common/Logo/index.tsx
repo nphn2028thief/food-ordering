@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { CPath } from "@/constanst/path";
+import { CPath } from "@/constants/path";
 
 const Logo = ({ className }: { className?: string }) => {
   return (

@@ -5,11 +5,16 @@ import { useForm } from "react-hook-form";
 import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { toast } from "react-toastify";
+import { useMutation } from "@tanstack/react-query";
 
+import axiosClient from "@/api/axiosClient";
 import Input from "@/components/common/HookForm/Input";
 import Button from "@/components/common/Button";
-import { CPath } from "@/constanst/path";
-import { ISignUp } from "@/type/auth";
+import { CPath } from "@/constants/path";
+import { useAppDispatch } from "@/lib/hooks";
+import { setIsLoading } from "@/lib/features/loading/loadingSlice";
+import { IMessage, ISignUp } from "@/types/auth";
+import { useRouter } from "next/navigation";
 
 const schema = Yup.object({
   displayName: Yup.string().required("Display name is required!"),
@@ -21,8 +26,14 @@ const schema = Yup.object({
 });
 
 const SignUp = () => {
+  const router = useRouter();
+
+  const dispatch = useAppDispatch();
+
   const {
     register,
+    setFocus,
+    reset,
     formState: { errors },
     handleSubmit,
   } = useForm<ISignUp>({
@@ -35,17 +46,29 @@ const SignUp = () => {
     resolver: yupResolver(schema),
   });
 
-  const onSubmit = (data: ISignUp) => {
-    console.log(data);
-    const id = toast.loading("Waiting for sign in...", {});
+  // Call api sign up with @tanstack/react-query lib
+  const { mutate: signUp } = useMutation({
+    mutationFn: async (data: ISignUp) => {
+      const res = await axiosClient.post<IMessage>("/auth/sign-up", data);
+      return res.data;
+    },
+    onSuccess: (data) => {
+      toast.success(data.message || "Sign up successfully!");
+      reset();
+      router.push(CPath.SIGNIN);
+    },
+    onError: (err: IMessage) => {
+      toast.error(err.message || "Sign up failure!");
+      setFocus("displayName");
+    },
+    onSettled: () => {
+      dispatch(setIsLoading(false));
+    },
+  });
 
-    setTimeout(() => {
-      toast.update(id, {
-        render: "Sign in successfully!",
-        type: "success",
-        isLoading: false,
-      });
-    }, 2000);
+  const onSubmit = (data: ISignUp) => {
+    dispatch(setIsLoading(true));
+    signUp(data);
   };
 
   return (
@@ -66,7 +89,7 @@ const SignUp = () => {
         <Input
           label="Email"
           htmlFor="email"
-          placeholder="E.g: Nhan Nguyen"
+          placeholder="E.g: example@gmail.com"
           register={register("email")}
           className="!py-3"
           errors={errors}
@@ -75,7 +98,7 @@ const SignUp = () => {
           type="password"
           label="Password"
           htmlFor="password"
-          placeholder="E.g: Nhan Nguyen"
+          placeholder="•••••••"
           register={register("password")}
           className="!py-3"
           errors={errors}
@@ -84,7 +107,7 @@ const SignUp = () => {
           type="password"
           label="Confirm password"
           htmlFor="confirmPassword"
-          placeholder="E.g: Nhan Nguyen"
+          placeholder="•••••••"
           register={register("confirmPassword")}
           className="!py-3"
           errors={errors}

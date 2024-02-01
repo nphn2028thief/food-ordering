@@ -9,3 +9,15 @@ export interface ISignIn {
   email: string;
   password: string;
 }
+
+export interface IMessage {
+  message: string;
+}
+
+export interface ISignInResponse {
+  message: string;
+  data: {
+    accessToken: string;
+    refreshToken: string;
+  };
+}
