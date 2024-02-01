@@ -1,14 +1,15 @@
 "use client";
 
+import Link from "next/link";
 import { useForm } from "react-hook-form";
 import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { toast } from "react-toastify";
 
 import Input from "@/components/common/HookForm/Input";
-import { ISignUp } from "@/type/auth";
 import Button from "@/components/common/Button";
-import Link from "next/link";
 import { CPath } from "@/constanst/path";
+import { ISignUp } from "@/type/auth";
 
 const schema = Yup.object({
   displayName: Yup.string().required("Display name is required!"),
@@ -36,6 +37,15 @@ const SignUp = () => {
 
   const onSubmit = (data: ISignUp) => {
     console.log(data);
+    const id = toast.loading("Waiting for sign in...", {});
+
+    setTimeout(() => {
+      toast.update(id, {
+        render: "Sign in successfully!",
+        type: "success",
+        isLoading: false,
+      });
+    }, 2000);
   };
 
   return (
@@ -62,6 +72,7 @@ const SignUp = () => {
           errors={errors}
         />
         <Input
+          type="password"
           label="Password"
           htmlFor="password"
           placeholder="E.g: Nhan Nguyen"
@@ -70,6 +81,7 @@ const SignUp = () => {
           errors={errors}
         />
         <Input
+          type="password"
           label="Confirm password"
           htmlFor="confirmPassword"
           placeholder="E.g: Nhan Nguyen"

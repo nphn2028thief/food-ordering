@@ -1,9 +1,9 @@
 import dynamic from "next/dynamic";
 
-import Loading from "@/components/common/Loading";
+import LazyLoading from "@/components/common/LazyLoading";
 
 const SignUp = dynamic(() => import("@/components/pages/SignUp"), {
-  loading: () => <Loading />,
+  loading: () => <LazyLoading />,
 });
 
 const SignUpPage = () => {
