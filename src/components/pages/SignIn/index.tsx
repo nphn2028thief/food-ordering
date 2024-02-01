@@ -1,15 +1,18 @@
 "use client";
 
+import Link from "next/link";
 import { useForm } from "react-hook-form";
 import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FcGoogle } from "react-icons/fc";
+import { toast } from "react-toastify";
 
 import Input from "@/components/common/HookForm/Input";
-import { ISignIn } from "@/type/auth";
 import Button from "@/components/common/Button";
-import Link from "next/link";
 import { CPath } from "@/constanst/path";
+import { useAppDispatch } from "@/lib/hooks";
+import { setIsLoading } from "@/lib/features/loading/loadingSlice";
+import { ISignIn } from "@/type/auth";
 
 const schema = Yup.object({
   email: Yup.string().email("Email is invalid!").required("Email is required!"),
@@ -29,8 +32,23 @@ const SignIn = () => {
     resolver: yupResolver(schema),
   });
 
+  const dispatch = useAppDispatch();
+
   const onSubmit = (data: ISignIn) => {
     console.log(data);
+
+    const id = toast.loading("Waiting for sign in...", {});
+    dispatch(setIsLoading(true));
+
+    setTimeout(() => {
+      toast.update(id, {
+        render: "Sign in successfully!",
+        type: "success",
+        isLoading: false,
+      });
+
+      dispatch(setIsLoading(false));
+    }, 2000);
   };
 
   return (
@@ -49,6 +67,7 @@ const SignIn = () => {
           errors={errors}
         />
         <Input
+          type="password"
           label="Password"
           htmlFor="password"
           placeholder="E.g: Nhan Nguyen"
