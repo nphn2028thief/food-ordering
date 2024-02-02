@@ -1,7 +1,8 @@
-import React from "react";
+"use client";
+
+import SectionHeader from "@/components/common/SectionHeader";
 import Banner from "../../features/Banner";
 import Menu from "../../features/Menu";
-import SectionHeader from "@/components/common/SectionHeader";
 
 const Home = () => {
   return (

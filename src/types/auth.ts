@@ -21,3 +21,10 @@ export interface ISignInResponse {
     refreshToken: string;
   };
 }
+
+export interface IUser {
+  _id: string;
+  displayName: string;
+  email: string;
+  refreshToken: string;
+}

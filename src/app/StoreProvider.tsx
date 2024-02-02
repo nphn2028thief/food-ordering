@@ -12,7 +12,7 @@ const GlobalLoading = () => {
 
   return isLoading ? (
     <div className="fixed inset-0 bg-black/15 z-[99999]">
-      <Loading className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
+      <Loading className="[&>svg]:w-10 [&>svg]:h-10 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
     </div>
   ) : null;
 };

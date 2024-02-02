@@ -1,21 +1,37 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { BiMenuAltRight } from "react-icons/bi";
 import { FiLogOut } from "react-icons/fi";
+import { IoMdSettings } from "react-icons/io";
 import { AnimatePresence, motion } from "framer-motion";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
+import axiosClient from "@/api/axiosClient";
 import Button from "@/components/common/Button";
 import Logo from "@/components/common/Logo";
 import { CPath, CPathList } from "@/constants/path";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { clearUser, setUser } from "@/lib/features/auth/authSlice";
+import Loading from "@/components/common/Loading";
+import useClickOuside from "@/hooks/useClickOutside";
 
 const Navbar = () => {
   const pathname = usePathname();
 
+  const queryClient = useQueryClient();
+
   const [showSidebarMobile, setShowSidebarMobile] = useState<boolean>(false);
+  const [showPopper, setShowPopper] = useState<boolean>(false);
   const headerRef = useRef<HTMLElement>(null);
+
+  const { user } = useAppSelector((state) => state.authSlice);
+  const dispatch = useAppDispatch();
+
+  const ref = useClickOuside(() => setShowPopper(false));
 
   useEffect(() => {
     const handleScroll = () => {
@@ -31,6 +47,29 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["getMe"],
+    queryFn: async () => {
+      const res = await axiosClient.get("/auth/get-me");
+      return res.data;
+    },
+    retry: 0,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+  });
+
+  useEffect(() => {
+    if (data) {
+      dispatch(setUser(data));
+    }
+  }, [data, dispatch]);
+
+  useEffect(() => {
+    if (isError) {
+      dispatch(clearUser());
+    }
+  }, [data, dispatch, isError]);
+
   return (
     <header
       ref={headerRef}
@@ -44,23 +83,88 @@ const Navbar = () => {
             <Link
               key={item.id}
               href={item.path}
-              className="px-6 lg:px-8 py-2 capitalize"
+              className="flex items-center px-6 lg:px-8 py-2 capitalize"
             >
               {item.name}
             </Link>
           ))}
 
-          <div className="flex items-center lg:gap-4">
-            <Button href={CPath.SIGNIN} className="!px-8 !py-2 !font-semibold">
-              Sign in
-            </Button>
-            <Button
-              href={CPath.SIGNUP}
-              primary
-              className="!px-8 !py-2 !font-semibold"
-            >
-              Sign up
-            </Button>
+          <div
+            className={`${
+              Object.keys(user).length ? "w-[180px] ml-6" : "w-[250px]"
+            } flex ${
+              isLoading ? "justify-center" : "justify-end"
+            } items-center md:gap-4`}
+          >
+            {Object.keys(user).length ? (
+              <>
+                <div className="relative border border-solid rounded-full">
+                  <Image
+                    ref={ref}
+                    src="/images/quarter-of-pizza.png"
+                    alt="avatar"
+                    width={38}
+                    height={38}
+                    onClick={() => setShowPopper(true)}
+                  />
+
+                  {showPopper ? (
+                    <motion.div
+                      initial={{ translateY: "-12px", opacity: 0 }}
+                      animate={{ translateY: 0, opacity: 1 }}
+                      transition={{ duration: 0.3 }}
+                      className="w-[200px] absolute top-[calc(var(--header-height)_-_24px)] -right-2 bg-white rounded-md shadow-popper"
+                    >
+                      <div className="flex flex-col p-4 border-b border-solid">
+                        <span>{user.displayName}</span>
+                        <span className="truncate">
+                          @{user.email.split("@")[0]}
+                        </span>
+                      </div>
+                      <div className="flex flex-col">
+                        <Link
+                          href={CPath.HOME}
+                          style={{ transition: "background 0.3s ease" }}
+                          className="flex items-center gap-2 hover:bg-black/5 px-4 py-2 my-2"
+                        >
+                          <IoMdSettings size={20} />
+                          Settings
+                        </Link>
+                      </div>
+                    </motion.div>
+                  ) : null}
+                </div>
+
+                <Button
+                  primary
+                  className="!px-8 !py-2 !font-semibold"
+                  onClick={() => {
+                    localStorage.removeItem("accessToken");
+                    queryClient.invalidateQueries({ queryKey: ["getMe"] });
+                  }}
+                >
+                  Sign out
+                </Button>
+              </>
+            ) : isLoading ? (
+              <Loading className="[&>svg]:w-8 [&>svg]:h-8" />
+            ) : (
+              <>
+                <Button
+                  href={CPath.SIGNIN}
+                  className="!px-8 !py-2 !font-semibold"
+                >
+                  Sign in
+                </Button>
+                <Button
+                  href={CPath.SIGNUP}
+                  primary
+                  className="!px-8 !py-2 !font-semibold"
+                >
+                  Sign up
+                </Button>
+              </>
+            )}
           </div>
         </nav>
 
@@ -105,7 +209,10 @@ const Navbar = () => {
                       // }}
                       className="w-[92px] h-[92px] border border-solid p-2 rounded-full overflow-hidden"
                     ></div>
-                    <p className="flex-1">Nguyen Nhan</p>
+                    <div className="flex flex-col">
+                      <p className="flex-1">{user.displayName}</p>
+                      <p className="flex-1">@{user.email.split("@")[0]}</p>
+                    </div>
                   </div>
 
                   <div className="flex flex-col mt-8 pb-8 border-b border-solid">
@@ -120,6 +227,18 @@ const Navbar = () => {
                         {item.name}
                       </Link>
                     ))}
+                  </div>
+
+                  <div className="flex flex-col mt-3 pb-3 border-b border-solid">
+                    <Link
+                      href={CPath.HOME}
+                      className={`flex items-center gap-2 px-8 py-2 capitalize rounded-md ${
+                        pathname === CPath.HOME && "text-white bg-primary"
+                      }`}
+                    >
+                      <IoMdSettings size={20} />
+                      Settings
+                    </Link>
                   </div>
 
                   <div className="flex flex-col mt-8">

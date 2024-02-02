@@ -1,17 +1,20 @@
 import Link from "next/link";
-import { CSSProperties, ElementType, ReactNode } from "react";
+import {
+  ButtonHTMLAttributes,
+  CSSProperties,
+  ElementType,
+  ReactNode,
+} from "react";
 
-interface IProps {
+interface IProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   href?: string;
   replace?: boolean;
   primary?: boolean;
   startIcon?: JSX.Element;
   endIcon?: JSX.Element;
-  disabled?: boolean;
   children: ReactNode;
   style?: CSSProperties;
   className?: string;
-  onClick?: () => void;
 }
 
 const Button = (props: IProps) => {
@@ -21,11 +24,10 @@ const Button = (props: IProps) => {
     primary = false,
     startIcon,
     endIcon,
-    disabled,
     children,
     style,
     className,
-    onClick,
+    ...rest
   } = props;
 
   let Component: ElementType = "button";
@@ -47,8 +49,7 @@ const Button = (props: IProps) => {
         ...style,
       }}
       className={`flex justify-center items-center gap-3 font-normal ${backgroundColor} px-[42px] py-3 rounded-[30px] hover:opacity-80 ${className}`}
-      disabled={disabled}
-      onClick={onClick}
+      {...rest}
     >
       {startIcon && <span className="flex">{startIcon}</span>}
       {children}
