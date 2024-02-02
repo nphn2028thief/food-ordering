@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FcGoogle } from "react-icons/fc";
 import { toast } from "react-toastify";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import axiosClient from "@/api/axiosClient";
 import Input from "@/components/common/HookForm/Input";
@@ -22,6 +23,9 @@ const schema = Yup.object({
 });
 
 const SignIn = () => {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+
   const dispatch = useAppDispatch();
 
   // React hook form lib
@@ -49,8 +53,11 @@ const SignIn = () => {
       return res.data;
     },
     onSuccess: (data) => {
+      localStorage.setItem("accessToken", data.data.accessToken);
       toast.success(data.message || "Sign in successfully!");
       reset();
+      queryClient.invalidateQueries({ queryKey: ["getMe"] });
+      router.forward();
     },
     onError: (err: IMessage) => {
       toast.error(err.message || "Sign in failure!");
@@ -90,7 +97,9 @@ const SignIn = () => {
           className="!py-3"
           errors={errors}
         />
-        <Button primary>Submit</Button>
+        <Button type="submit" primary>
+          Submit
+        </Button>
         <p>
           New user?{" "}
           <Link
@@ -105,6 +114,7 @@ const SignIn = () => {
         <div className="text-center -mt-5">----- Or -----</div>
 
         <Button
+          type="button"
           className="shadow-google-btn"
           startIcon={<FcGoogle size={24} />}
         >
