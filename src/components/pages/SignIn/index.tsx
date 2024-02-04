@@ -15,6 +15,7 @@ import Button from "@/components/common/Button";
 import { CPath } from "@/constants/path";
 import { useAppDispatch } from "@/lib/hooks";
 import { setIsLoading } from "@/lib/features/loading/loadingSlice";
+import { setAccessToken } from "@/lib/features/auth/authSlice";
 import { IMessage, ISignIn, ISignInResponse } from "@/types/auth";
 
 const schema = Yup.object({
@@ -54,10 +55,12 @@ const SignIn = () => {
     },
     onSuccess: (data) => {
       localStorage.setItem("accessToken", data.data.accessToken);
+      localStorage.setItem("refreshToken", data.data.refreshToken);
+      dispatch(setAccessToken(data.data.accessToken));
       toast.success(data.message || "Sign in successfully!");
       reset();
       queryClient.invalidateQueries({ queryKey: ["getMe"] });
-      router.forward();
+      router.back();
     },
     onError: (err: IMessage) => {
       toast.error(err.message || "Sign in failure!");

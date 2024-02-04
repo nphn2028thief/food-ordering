@@ -4,10 +4,12 @@ import { IUser } from "@/types/auth";
 
 interface IState {
   user: IUser;
+  accessToken: string;
 }
 
 const initialState: IState = {
   user: {} as IUser,
+  accessToken: "",
 };
 
 const authSlice = createSlice({
@@ -17,11 +19,14 @@ const authSlice = createSlice({
     setUser: (state, action: PayloadAction<IUser>) => {
       state.user = action.payload;
     },
+    setAccessToken: (state, action: PayloadAction<string>) => {
+      state.accessToken = action.payload;
+    },
     clearUser: (state) => {
       state.user = initialState.user;
     },
   },
 });
 
-export const { setUser, clearUser } = authSlice.actions;
+export const { setUser, setAccessToken, clearUser } = authSlice.actions;
 export default authSlice.reducer;
