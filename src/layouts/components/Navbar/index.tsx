@@ -8,18 +8,17 @@ import { BiMenuAltRight } from "react-icons/bi";
 import { FiLogOut } from "react-icons/fi";
 import { IoMdSettings } from "react-icons/io";
 import { AnimatePresence, motion } from "framer-motion";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 
-import axiosClient from "@/api/axiosClient";
+import useClickOuside from "@/hooks/useClickOutside";
 import Button from "@/components/common/Button";
 import Logo from "@/components/common/Logo";
+import Loading from "@/components/common/Loading";
 import { CPath, CPathList } from "@/constants/path";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { clearUser, setUser } from "@/lib/features/auth/authSlice";
-import Loading from "@/components/common/Loading";
-import useClickOuside from "@/hooks/useClickOutside";
+import { setAccessToken } from "@/lib/features/auth/authSlice";
 
-const Navbar = () => {
+const Navbar = ({ isLoading }: { isLoading: boolean }) => {
   const pathname = usePathname();
 
   const queryClient = useQueryClient();
@@ -47,28 +46,11 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ["getMe"],
-    queryFn: async () => {
-      const res = await axiosClient.get("/auth/get-me");
-      return res.data;
-    },
-    retry: 0,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-  });
-
-  useEffect(() => {
-    if (data) {
-      dispatch(setUser(data));
-    }
-  }, [data, dispatch]);
-
-  useEffect(() => {
-    if (isError) {
-      dispatch(clearUser());
-    }
-  }, [data, dispatch, isError]);
+  const handleSignOut = () => {
+    localStorage.removeItem("accessToken");
+    queryClient.invalidateQueries({ queryKey: ["getMe"] });
+    dispatch(setAccessToken(""));
+  };
 
   return (
     <header
@@ -83,16 +65,16 @@ const Navbar = () => {
             <Link
               key={item.id}
               href={item.path}
-              className="flex items-center px-6 lg:px-8 py-2 capitalize"
+              className={`flex items-center px-6 lg:px-8 py-2 capitalize nav-item ${
+                pathname === item.path && "active"
+              }`}
             >
               {item.name}
             </Link>
           ))}
 
           <div
-            className={`${
-              Object.keys(user).length ? "w-[180px] ml-6" : "w-[250px]"
-            } flex ${
+            className={`w-[250px] flex ${
               isLoading ? "justify-center" : "justify-end"
             } items-center md:gap-4`}
           >
@@ -138,10 +120,7 @@ const Navbar = () => {
                 <Button
                   primary
                   className="!px-8 !py-2 !font-semibold"
-                  onClick={() => {
-                    localStorage.removeItem("accessToken");
-                    queryClient.invalidateQueries({ queryKey: ["getMe"] });
-                  }}
+                  onClick={handleSignOut}
                 >
                   Sign out
                 </Button>
@@ -201,19 +180,32 @@ const Navbar = () => {
                 className="w-9/12 fixed top-0 right-0 bottom-0 bg-white z-[1000]"
               >
                 <div className="p-4">
-                  <div className="flex items-center gap-4 pb-8 border-b border-solid">
-                    <div
-                      // style={{
-                      //   background:
-                      //     "center / cover no-repeat url('https://res.cloudinary.com/drsjohvgv/image/upload/v1704976923/movie-ticket/ijonoal84yo96efkdf5c.jpg')",
-                      // }}
-                      className="w-[92px] h-[92px] border border-solid p-2 rounded-full overflow-hidden"
-                    ></div>
-                    <div className="flex flex-col">
-                      <p className="flex-1">{user.displayName}</p>
-                      <p className="flex-1">@{user.email.split("@")[0]}</p>
+                  {Object.keys(user).length ? (
+                    <div className="flex items-center gap-4 pb-8 border-b border-solid">
+                      <div
+                        // style={{
+                        //   background:
+                        //     "center / cover no-repeat url('https://res.cloudinary.com/drsjohvgv/image/upload/v1704976923/movie-ticket/ijonoal84yo96efkdf5c.jpg')",
+                        // }}
+                        className="w-[92px] h-[92px] border border-solid p-2 rounded-full overflow-hidden"
+                      ></div>
+                      <div className="flex flex-col">
+                        <p className="flex-1">{user.displayName}</p>
+                        <p className="flex-1">@{user.email.split("@")[0]}</p>
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="flex flex-col">
+                      <Button
+                        primary
+                        className="!py-2"
+                        endIcon={<FiLogOut size={16} />}
+                        onClick={handleSignOut}
+                      >
+                        Sign in
+                      </Button>
+                    </div>
+                  )}
 
                   <div className="flex flex-col mt-8 pb-8 border-b border-solid">
                     {CPathList.map((item) => (
@@ -241,15 +233,18 @@ const Navbar = () => {
                     </Link>
                   </div>
 
-                  <div className="flex flex-col mt-8">
-                    <Button
-                      primary
-                      className="!py-2"
-                      endIcon={<FiLogOut size={16} />}
-                    >
-                      Log out
-                    </Button>
-                  </div>
+                  {Object.keys(user).length ? (
+                    <div className="flex flex-col mt-8">
+                      <Button
+                        primary
+                        className="!py-2"
+                        endIcon={<FiLogOut size={16} />}
+                        onClick={handleSignOut}
+                      >
+                        Sign out
+                      </Button>
+                    </div>
+                  ) : null}
                 </div>
               </motion.div>
             </>

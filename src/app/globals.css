@@ -34,3 +34,24 @@ input,
 button {
   outline: none;
 }
+
+.nav-item {
+  position: relative;
+}
+
+.nav-item::after {
+  content: "";
+  position: absolute;
+  bottom: 0px;
+  left: 40%;
+  transform: translateX(-35%);
+  width: 0;
+  height: 2px;
+  transition: width 0.5s ease;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.nav-item:hover::after,
+.nav-item.active::after {
+  width: 70%;
+}
